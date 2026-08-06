@@ -4,8 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#050706" />
-  <meta name="description" content="Painel mobile interativo para lives de futebol, presentes, curtidas e seguidores." />
+  <meta name="description" content="Painel mobile interativo para TikTok LIVE com ranking, presentes e curtidas." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>FUT Live Panel</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
@@ -14,85 +17,39 @@
 </head>
 <body>
   <main class="app-shell">
-    <header class="topbar glass">
-      <div class="brand-wrap">
-        <span class="live-pill"><span class="live-dot"></span> AO VIVO</span>
-        <div>
-          <p class="eyebrow">PAINEL INTERATIVO</p>
-          <h1>FUT <span>LIVE</span></h1>
-        </div>
-      </div>
-      <div class="top-stats" aria-label="Estatísticas da live">
-        <div><span>👑</span><strong id="winsCount">182</strong></div>
-        <div><span>👥</span><strong id="viewerCount">39.4K</strong></div>
-        <div><span>💎</span><strong id="giftCount">123</strong></div>
-      </div>
-    </header>
-
-    <section class="event-banner glass">
-      <div class="event-copy">
-        <span class="event-icon">⚡</span>
-        <div><p>EVENTO ATIVO</p><strong id="eventName">SÁBADO PREMIADO</strong></div>
-      </div>
-      <div class="event-ball" aria-hidden="true">⚽</div>
-      <div class="event-timer"><p>TERMINA EM</p><strong id="countdown">01:23:45</strong></div>
+    <section class="connection-bar glass admin-only">
+      <div><span id="connectionDot" class="connection-dot"></span><strong id="connectionText">Modo demonstração</strong><small id="connectionDetail">Backend não configurado</small></div>
+      <div class="connection-actions"><button id="connectLiveButton" type="button">Conectar LIVE</button><button id="historyButton" type="button">Histórico</button></div>
     </section>
 
-    <section class="dashboard-grid">
-      <section class="ranking-panel glass">
-        <div class="section-title">
-          <div><span>🏆</span><h2>Ranking de clubes</h2></div>
-          <button id="simulateGift" class="ghost-button admin-only" type="button">Simular presente</button>
-        </div>
-        <div id="rankingList" class="ranking-list" aria-live="polite"></div>
-      </section>
+    <header class="topbar glass">
+      <div class="brand-wrap"><span class="live-pill"><span class="live-dot"></span> AO VIVO</span><div><p class="eyebrow">PAINEL INTERATIVO</p><h1>FUT <span>LIVE</span></h1></div></div>
+      <div class="top-stats" aria-label="Estatísticas da live"><div><span>👑</span><strong id="winsCount">182</strong></div><div><span>👥</span><strong id="viewerCount">0</strong></div><div><span>💎</span><strong id="giftCount">123</strong></div></div>
+    </header>
 
+    <section class="event-banner glass"><div class="event-copy"><span class="event-icon">⚡</span><div><p>EVENTO ATIVO</p><strong id="eventName">SÁBADO PREMIADO</strong></div></div><div class="event-ball" aria-hidden="true">⚽</div><div class="event-timer"><p>TERMINA EM</p><strong id="countdown">01:23:45</strong></div></section>
+
+    <section class="dashboard-grid">
+      <section class="ranking-panel glass"><div class="section-title"><div><span>🏆</span><h2>Ranking de clubes</h2></div><button id="simulateGift" class="ghost-button admin-only" type="button">Simular presente</button></div><div id="rankingList" class="ranking-list" aria-live="polite"></div></section>
       <aside class="side-widgets">
-        <section class="goal-card widget-card">
-          <div><strong id="goalCount">50</strong><span>GOLS</span></div>
-          <div class="flame-ball">⚽</div>
-          <p id="goalMessage">MANDE PRESENTE E CONCORRA</p>
-        </section>
-        <section class="widget-card last-event-card">
-          <p class="widget-label">👑 ÚLTIMO PRESENTE</p>
-          <div class="user-chip"><span class="avatar" id="lastGiftAvatar">P</span><div><strong id="lastGiftUser">gbzins_x</strong><small id="lastGiftName">Rosa · +1 ponto</small></div></div>
-        </section>
-        <section class="widget-card last-event-card">
-          <p class="widget-label">👆 ÚLTIMO TAP TAP</p>
-          <div class="user-chip"><span class="avatar blue" id="lastLikeAvatar">K</span><div><strong id="lastLikeUser">knzinsc7</strong><small>curtiu a live</small></div></div>
-        </section>
-        <section class="widget-card likes-card">
-          <p class="widget-label pink">❤ CURTIDAS AO VIVO</p>
-          <div class="likes-row"><div class="progress-track"><span id="likesProgress"></span></div><strong id="likesCount">5</strong></div>
-          <small><span id="peopleLiking">5</span> pessoas curtindo agora</small>
-        </section>
-        <section class="widget-card last-event-card">
-          <p class="widget-label">➕ ÚLTIMO SEGUIDOR</p>
-          <div class="user-chip"><span class="avatar violet" id="lastFollowerAvatar">G</span><div><strong id="lastFollowerUser">guizinn870</strong><small>começou a seguir</small></div></div>
-        </section>
+        <section class="goal-card widget-card"><div><strong id="goalCount">50</strong><span>GOLS</span></div><div class="flame-ball">⚽</div><p id="goalMessage">MANDE PRESENTE E CONCORRA</p></section>
+        <section class="widget-card last-event-card"><p class="widget-label">👑 ÚLTIMO PRESENTE</p><div class="user-chip"><span class="avatar" id="lastGiftAvatar">P</span><div><strong id="lastGiftUser">gbzins_x</strong><small id="lastGiftName">Rosa · +1 ponto</small></div></div></section>
+        <section class="widget-card last-event-card"><p class="widget-label">👆 ÚLTIMO TAP TAP</p><div class="user-chip"><span class="avatar blue" id="lastLikeAvatar">K</span><div><strong id="lastLikeUser">knzinsc7</strong><small>curtiu a live</small></div></div></section>
+        <section class="widget-card likes-card"><p class="widget-label pink">❤ CURTIDAS AO VIVO</p><div class="likes-row"><div class="progress-track"><span id="likesProgress"></span></div><strong id="likesCount">5</strong></div><small><span id="peopleLiking">5</span> pessoas curtindo agora</small></section>
+        <section class="widget-card last-event-card"><p class="widget-label">➕ ÚLTIMO SEGUIDOR</p><div class="user-chip"><span class="avatar violet" id="lastFollowerAvatar">G</span><div><strong id="lastFollowerUser">guizinn870</strong><small>começou a seguir</small></div></div></section>
       </aside>
     </section>
 
-    <nav class="bottom-nav glass admin-only" aria-label="Navegação principal">
-      <button id="chatButton" type="button"><span>💬</span><small>Chat</small></button>
-      <button id="rankingButton" type="button"><span>👥</span><small>Ranking</small></button>
-      <button type="button" class="tap-main" id="tapButton"><span>⚽</span><small>Tap Tap</small></button>
-      <button id="prizesButton" type="button"><span>🎁</span><small>Prêmios</small></button>
-      <button id="settingsButton" type="button"><span>⚙️</span><small>Ajustes</small></button>
-    </nav>
-
+    <nav class="bottom-nav glass admin-only" aria-label="Navegação principal"><button id="chatButton" type="button"><span>💬</span><small>Chat</small></button><button id="rankingButton" type="button"><span>👥</span><small>Ranking</small></button><button type="button" class="tap-main" id="tapButton"><span>⚽</span><small>Tap Tap</small></button><button id="prizesButton" type="button"><span>🎁</span><small>Prêmios</small></button><button id="settingsButton" type="button"><span>⚙️</span><small>Ajustes</small></button></nav>
     <button id="exitBroadcast" class="exit-broadcast" type="button">Sair da transmissão</button>
+    <div id="eventEffect" class="event-effect" aria-live="polite"></div>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </main>
 
-  <div id="appModal" class="modal-root" aria-hidden="true">
-    <div class="modal-backdrop" data-close-modal></div>
-    <section class="app-modal" role="dialog" aria-modal="true">
-      <button class="modal-close" data-close-modal aria-label="Fechar">×</button>
-      <div id="modalContent"></div>
-    </section>
-  </div>
+  <div id="appModal" class="modal-root" aria-hidden="true"><div class="modal-backdrop" data-close-modal></div><section class="app-modal" role="dialog" aria-modal="true"><button class="modal-close" data-close-modal aria-label="Fechar">×</button><div id="modalContent"></div></section></div>
 
   <script src="app.js"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" crossorigin="anonymous"></script>
+  <script src="realtime.js"></script>
 </body>
 </html>
