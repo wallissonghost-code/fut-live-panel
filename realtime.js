@@ -2,10 +2,12 @@
   'use strict';
   const CFG_KEY='futLiveRealtimeConfigV1';
   const HISTORY_KEY='futLiveHistoryV1';
+  const GIFT_IMAGES_KEY='futLiveGiftImagesV1';
   const $=s=>document.querySelector(s);
   let socket=null;
   let cfg=loadCfg();
   let history=loadHistory();
+  let giftImages=loadGiftImages();
   let userClub=new Map();
   let lastLeader='';
 
@@ -13,6 +15,8 @@
   function saveCfg(){localStorage.setItem(CFG_KEY,JSON.stringify(cfg))}
   function loadHistory(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]')}catch{return []}}
   function saveHistory(){history=history.slice(0,500);localStorage.setItem(HISTORY_KEY,JSON.stringify(history))}
+  function loadGiftImages(){try{return JSON.parse(localStorage.getItem(GIFT_IMAGES_KEY)||'{}')}catch{return {}}}
+  function saveGiftImages(){localStorage.setItem(GIFT_IMAGES_KEY,JSON.stringify(giftImages));window.dispatchEvent(new CustomEvent('futlive:gifts-updated'))}
   function addHistory(type,data){history.unshift({time:new Date().toISOString(),type,...data});saveHistory()}
   function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
   function panelState(){try{return JSON.parse(localStorage.getItem('futLivePanelStateV2')||'{}')}catch{return {}}}
@@ -38,6 +42,8 @@
   function currentLeader(){return document.querySelector('.rank-row .club-name')?.textContent||''}
   function checkLeader(){const leader=currentLeader();if(lastLeader&&leader&&leader!==lastLeader)effect('👑','NOVO LÍDER',leader);lastLeader=leader}
   function giftPoints(name,diamondCount=1){const g=gifts().find(x=>normalize(x.name)===normalize(name));return Math.max(1,Number(g?.points||diamondCount||1))}
+  function rememberGiftImage(name,url){if(!name||!/^https?:\/\//i.test(String(url||'')))return;giftImages[normalize(name)]=String(url);saveGiftImages()}
+  function receiveGiftCatalog(data){(data?.gifts||[]).forEach(gift=>rememberGiftImage(gift.name,gift.imageUrl))}
 
   function receiveComment(data){
     const username=data.username||data.uniqueId||'usuário';
@@ -49,11 +55,13 @@
   function receiveGift(data){
     const username=data.username||data.uniqueId||'usuário';
     const giftName=data.giftName||data.name||'Presente';
-    const club=userClub.get(username)||findClub(data.comment||'')||clubs()[0]?.name;
-    const points=giftPoints(giftName,data.diamondCount);
+    rememberGiftImage(giftName,data.giftImageUrl||data.imageUrl);
+    const mappedTeam=window.FutLiveTeamGifts?.resolveGift?.(giftName);
+    const club=mappedTeam?.name||userClub.get(username)||findClub(data.comment||'')||clubs()[0]?.name;
+    const points=mappedTeam?.points||giftPoints(giftName,data.diamondCount);
     if(club)window.FutLivePanel?.receiveGift({username,clubName:club,giftName,points,emoji:'🎁'});
-    addHistory('gift',{username,giftName,points,club,repeatCount:data.repeatCount||1});
-    effect(points>=100?'🔥':'🎁',`${username} enviou ${giftName}`,`${club||'Sem clube'} · +${points} pontos`);
+    addHistory('gift',{username,giftName,points,club,repeatCount:data.repeatCount||1,imageUrl:data.giftImageUrl||''});
+    effect(points>=100?'🔥':'🎁',`${username} enviou presente`,`${club||'Sem clube'} · +${points} pontos`);
     setTimeout(checkLeader,150);
   }
   function receiveLike(data){const username=data.username||data.uniqueId||'usuário';const count=Math.max(1,Number(data.likeCount||data.count||1));window.FutLivePanel?.receiveLike(username,count);addHistory('like',{username,count})}
@@ -64,6 +72,7 @@
     s.on('disconnect',()=>setStatus('offline','Backend desconectado','Reconectando automaticamente…'));
     s.on('connect_error',e=>setStatus('error','Erro no backend',e.message));
     s.on('tiktok:status',d=>setStatus(d.connected?'live':'online',d.connected?'LIVE conectada':'Backend conectado',d.message||d.username||''));
+    s.on('tiktok:giftCatalog',receiveGiftCatalog);
     s.on('tiktok:comment',receiveComment);
     s.on('tiktok:gift',receiveGift);
     s.on('tiktok:like',receiveLike);
@@ -90,11 +99,11 @@
     const saved=panelState().tiktokUser||'';
     window.openModal?.(`<h3>Conectar TikTok LIVE</h3>
       <label>URL do backend<input id="rtBackend" class="modal-input" value="${esc(cfg.backendUrl)}" placeholder="https://seu-backend.onrender.com"></label>
-      <label>PIN do administrador<input id="rtPin" class="modal-input" type="password" inputmode="numeric" value="${esc(cfg.adminPin)}" placeholder="PIN definido no servidor"></label>
+      <label>PIN do administrador<input id="rtPin" class="modal-input" type="password" value="${esc(cfg.adminPin)}" placeholder="PIN definido no servidor"></label>
       <label>Usuário TikTok<input id="rtUser" class="modal-input" value="${esc(saved)}" placeholder="@usuario"></label>
       <label class="check-line"><input id="rtAuto" type="checkbox" ${cfg.autoConnect?'checked':''}> Reconectar automaticamente ao abrir</label>
       <button id="rtSave" class="modal-action">Salvar e conectar</button>
-      <p class="helper-text">O backend precisa ficar hospedado em um serviço com processo contínuo e WebSocket, como Render ou Railway.</p>`);
+      <p class="helper-text">Ao conectar, o painel carrega as imagens reais dos presentes disponíveis na LIVE.</p>`);
     $('#rtSave').onclick=()=>{cfg.backendUrl=$('#rtBackend').value.trim();cfg.adminPin=$('#rtPin').value.trim();cfg.autoConnect=$('#rtAuto').checked;saveCfg();const user=$('#rtUser').value.trim();window.closeModal?.();connectBackend();setTimeout(()=>connectTikTok(user),1200)};
   }
   function exportCsv(){
