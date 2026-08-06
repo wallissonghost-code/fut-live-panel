@@ -1,5 +1,5 @@
-const CACHE='fut-live-v4';
-const ASSETS=['/','/index.html','/styles.css','/admin.css','/preboot.js','/app.js','/realtime.js','/manifest.webmanifest','/icon.svg'];
+const CACHE='fut-live-v5';
+const ASSETS=['/','/index.html','/styles.css','/admin.css','/gifts-panel.css','/preboot.js','/team-gifts.js','/gifts-panel.js','/app.js','/realtime.js','/reset-panel.js','/manifest.webmanifest','/icon.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
