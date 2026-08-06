@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const STORAGE_KEY='futLivePanelStateV2';
-  const MIGRATION_KEY='futLiveTeamGiftsV1';
+  const MIGRATION_KEY='futLiveTeamGiftsV2';
   const logo=domain=>`https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128`;
   const TEAMS=[
     ['Palmeiras','PAL','#146b35','palmeiras.com.br','Rose'],
@@ -39,28 +39,33 @@
     localStorage.setItem(MIGRATION_KEY,'1');
   }
 
-  function resolveGift(name){
-    const n=normalize(name);
-    return TEAMS.find(t=>normalize(t.giftName)===n)||null;
-  }
+  function resolveGift(name){const n=normalize(name);return TEAMS.find(t=>normalize(t.giftName)===n)||null}
   function getTeam(name){return TEAMS.find(t=>normalize(t.name)===normalize(name))||null}
   function patchRanking(){
     document.querySelectorAll('.rank-row').forEach(row=>{
       const team=getTeam(row.dataset.club||row.querySelector('.club-name')?.textContent);
       const badge=row.querySelector('.club-badge');
       if(!team||!badge||badge.dataset.crestReady)return;
-      badge.dataset.crestReady='1';
-      badge.classList.add('club-crest-badge');
-      badge.innerHTML=`<img src="${team.logo}" alt="Escudo ${team.name}" loading="lazy"><span>${team.short}</span>`;
-      const img=badge.querySelector('img');
-      img.addEventListener('error',()=>{img.hidden=true;badge.querySelector('span').hidden=false});
+      badge.dataset.crestReady='1';badge.classList.add('club-crest-badge');
+      badge.innerHTML=`<img src="${team.logo}" alt="Escudo ${team.name}" loading="lazy"><span hidden>${team.short}</span>`;
+      const img=badge.querySelector('img');img.addEventListener('error',()=>{img.hidden=true;badge.querySelector('span').hidden=false});
     });
+  }
+  function hookGiftApi(){
+    if(!window.FutLivePanel?.receiveGift)return false;
+    if(window.FutLivePanel.receiveGift.__teamGiftHook)return true;
+    const original=window.FutLivePanel.receiveGift.bind(window.FutLivePanel);
+    const hooked=(payload={})=>{
+      const team=resolveGift(payload.giftName);
+      return original({...payload,clubName:team?.name||payload.clubName,points:team?.points||payload.points||1,emoji:team?'⚽':payload.emoji});
+    };
+    hooked.__teamGiftHook=true;window.FutLivePanel.receiveGift=hooked;return true;
   }
   const observer=new MutationObserver(patchRanking);
   document.addEventListener('DOMContentLoaded',()=>{
-    patchRanking();
-    const list=document.querySelector('#rankingList');
-    if(list)observer.observe(list,{childList:true,subtree:true});
+    patchRanking();const list=document.querySelector('#rankingList');if(list)observer.observe(list,{childList:true,subtree:true});
+    const timer=setInterval(()=>{if(hookGiftApi())clearInterval(timer)},100);
+    setTimeout(()=>clearInterval(timer),10000);
   });
   window.FutLiveTeamGifts={teams:TEAMS,resolveGift,getTeam,patchRanking};
 })();
