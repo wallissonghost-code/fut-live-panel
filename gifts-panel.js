@@ -1,23 +1,34 @@
 (() => {
-  const STORAGE_KEY='futLivePanelStateV2';
-  const fallback=[
-    {name:'Rosa',points:1,emoji:'🌹'},
-    {name:'Coração',points:5,emoji:'💚'},
-    {name:'Bola',points:10,emoji:'⚽'},
-    {name:'Troféu',points:25,emoji:'🏆'},
-    {name:'Leão',points:100,emoji:'🦁'}
-  ];
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  function getGifts(){
-    try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}').gifts||fallback}
-    catch{return fallback}
+  'use strict';
+  const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+
+  function render() {
+    const list = document.querySelector('#giftsGuideList');
+    const teams = window.FutLiveTeamGifts?.teams || [];
+    if (!list) return;
+
+    list.innerHTML = teams.map((team) => `
+      <article class="gift-guide-card">
+        <span class="gift-team-crest">
+          <img src="${team.logo}" alt="Escudo ${escapeHtml(team.name)}" loading="lazy">
+          <b hidden>${escapeHtml(team.short)}</b>
+        </span>
+        <div class="gift-guide-info">
+          <strong>${escapeHtml(team.name)}</strong>
+          <small>🎁 ${escapeHtml(team.giftName)}</small>
+          <span>${team.coins} MOEDA · +${team.points} PTS</span>
+        </div>
+      </article>`).join('');
+
+    list.querySelectorAll('img').forEach((image) => {
+      image.addEventListener('error', () => {
+        image.hidden = true;
+        image.nextElementSibling.hidden = false;
+      });
+    });
   }
-  function render(){
-    const list=document.querySelector('#giftsGuideList');
-    if(!list)return;
-    list.innerHTML=getGifts().map(g=>`<article class="gift-guide-card"><span class="gift-guide-icon">${esc(g.emoji||'🎁')}</span><div class="gift-guide-info"><strong>${esc(g.name||'Presente')}</strong><span>+${Number(g.points)||0} PTS</span></div></article>`).join('');
-  }
-  window.addEventListener('storage',render);
-  document.addEventListener('DOMContentLoaded',render);
-  window.FutLiveGiftsGuide={render};
+
+  document.addEventListener('DOMContentLoaded', render);
+  window.addEventListener('storage', render);
+  window.FutLiveGiftsGuide = { render };
 })();
