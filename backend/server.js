@@ -21,6 +21,7 @@ const io = new Server(server, {
 
 let live = null;
 let liveUsername = '';
+let giftCatalog = [];
 let roomState = { connected: false, roomId: null, viewerCount: 0, startedAt: null };
 
 function safeText(value, max = 120) {
@@ -34,6 +35,48 @@ function authorized(pin) {
 }
 function status(message = '') {
   return { ...roomState, username: liveUsername, message };
+}
+function firstUrl(...values) {
+  for (const value of values) {
+    if (typeof value === 'string' && /^https?:\/\//i.test(value)) return value;
+    if (Array.isArray(value)) {
+      const found = value.find(item => typeof item === 'string' && /^https?:\/\//i.test(item));
+      if (found) return found;
+    }
+  }
+  return '';
+}
+function giftImageOf(data = {}) {
+  const info = data.extendedGiftInfo || data.giftDetails || data;
+  return firstUrl(
+    info?.image?.url_list,
+    info?.image?.urlList,
+    info?.icon?.url_list,
+    info?.icon?.urlList,
+    info?.picture_url,
+    info?.pictureUrl,
+    info?.image_url,
+    info?.imageUrl,
+    data?.giftPictureUrl,
+    data?.giftImageUrl
+  );
+}
+function normalizeGift(gift = {}) {
+  return {
+    id: String(gift.id ?? gift.gift_id ?? gift.giftId ?? ''),
+    name: safeText(gift.name || gift.gift_name || gift.giftName || 'Presente', 80),
+    diamondCount: Number(gift.diamond_count ?? gift.diamondCount ?? gift.cost ?? 1) || 1,
+    imageUrl: giftImageOf(gift)
+  };
+}
+async function publishGiftCatalog(connection) {
+  try {
+    const list = await connection.fetchAvailableGifts();
+    giftCatalog = (Array.isArray(list) ? list : []).map(normalizeGift).filter(gift => gift.name);
+    io.emit('tiktok:giftCatalog', { gifts: giftCatalog });
+  } catch (error) {
+    console.warn('Não foi possível carregar o catálogo de presentes:', error?.message || error);
+  }
 }
 async function disconnectLive(reason = 'Desconectado') {
   if (live) {
@@ -51,12 +94,15 @@ function bindTikTok(connection) {
   });
   connection.on(WebcastEvent.GIFT, data => {
     if (data.giftType === 1 && !data.repeatEnd) return;
+    const giftName = safeText(data.giftDetails?.giftName || data.extendedGiftInfo?.name || data.giftName || 'Presente', 80);
+    const catalogGift = giftCatalog.find(gift => gift.name.toLowerCase() === giftName.toLowerCase() || String(gift.id) === String(data.giftId));
     io.emit('tiktok:gift', {
       username: usernameOf(data),
-      giftName: safeText(data.giftDetails?.giftName || data.giftName || 'Presente', 80),
+      giftName,
       giftId: data.giftId,
+      giftImageUrl: giftImageOf(data) || catalogGift?.imageUrl || '',
       repeatCount: Number(data.repeatCount || 1),
-      diamondCount: Number(data.giftDetails?.diamondCount || data.diamondCount || 1)
+      diamondCount: Number(data.giftDetails?.diamondCount || data.extendedGiftInfo?.diamond_count || data.diamondCount || catalogGift?.diamondCount || 1)
     });
   });
   connection.on(WebcastEvent.LIKE, data => {
@@ -93,6 +139,7 @@ async function connectLive(username) {
   const result = await live.connect();
   roomState = { connected: true, roomId: result.roomId || live.roomId || null, viewerCount: 0, startedAt: new Date().toISOString() };
   io.emit('tiktok:status', status(`Conectado a @${clean}`));
+  publishGiftCatalog(live);
   return roomState;
 }
 
@@ -116,6 +163,7 @@ io.use((socket, next) => {
 });
 io.on('connection', socket => {
   socket.emit('tiktok:status', status(roomState.connected ? `Conectado a @${liveUsername}` : 'Nenhuma LIVE conectada'));
+  if (giftCatalog.length) socket.emit('tiktok:giftCatalog', { gifts: giftCatalog });
   socket.on('tiktok:connect', async (payload = {}, reply = () => {}) => {
     if (!socket.data.isAdmin && !authorized(payload.pin)) return reply({ ok: false, error: 'PIN inválido' });
     try { reply({ ok: true, state: await connectLive(payload.username) }); }
