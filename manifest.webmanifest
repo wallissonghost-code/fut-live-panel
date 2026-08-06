@@ -1,0 +1,13 @@
+{
+  "name": "FUT Live Panel",
+  "short_name": "FUT Live",
+  "description": "Painel mobile interativo para TikTok LIVE",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050706",
+  "theme_color": "#050706",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
