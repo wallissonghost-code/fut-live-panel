@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: fut-live-panel-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: ADMIN_PIN
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: https://fut-live-panel.vercel.app
