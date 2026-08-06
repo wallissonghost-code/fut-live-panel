@@ -14,6 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="admin.css" />
+  <link rel="stylesheet" href="gifts-panel.css" />
 </head>
 <body>
   <main class="app-shell">
@@ -26,6 +27,14 @@
       <div class="brand-wrap"><span class="live-pill"><span class="live-dot"></span> AO VIVO</span><div><p class="eyebrow">PAINEL INTERATIVO</p><h1>FUT <span>LIVE</span></h1></div></div>
       <div class="top-stats" aria-label="Estatísticas da live"><div><span>👑</span><strong id="winsCount">0</strong></div><div><span>👥</span><strong id="viewerCount">0</strong></div><div><span>💎</span><strong id="giftCount">0</strong></div></div>
     </header>
+
+    <section class="gifts-guide" aria-label="Presentes e pontuação">
+      <div class="gifts-guide-head">
+        <div><span>🎁</span><h2>Envie um presente para marcar pontos</h2></div>
+        <small>Escolha seu time no comentário e depois mande o presente</small>
+      </div>
+      <div id="giftsGuideList" class="gifts-guide-list"></div>
+    </section>
 
     <section class="event-banner glass"><div class="event-copy"><span class="event-icon">⚡</span><div><p>EVENTO ATIVO</p><strong id="eventName">SÁBADO PREMIADO</strong></div></div><div class="event-ball" aria-hidden="true">⚽</div><div class="event-timer"><p>TERMINA EM</p><strong id="countdown">01:23:45</strong></div></section>
 
@@ -49,6 +58,7 @@
   <div id="appModal" class="modal-root" aria-hidden="true"><div class="modal-backdrop" data-close-modal></div><section class="app-modal" role="dialog" aria-modal="true"><button class="modal-close" data-close-modal aria-label="Fechar">×</button><div id="modalContent"></div></section></div>
 
   <script src="preboot.js"></script>
+  <script src="gifts-panel.js"></script>
   <script src="app.js"></script>
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" crossorigin="anonymous"></script>
   <script src="realtime.js"></script>
