@@ -28,10 +28,10 @@
       <div class="top-stats" aria-label="Estatísticas da live"><div><span>👑</span><strong id="winsCount">0</strong></div><div><span>👥</span><strong id="viewerCount">0</strong></div><div><span>💎</span><strong id="giftCount">0</strong></div></div>
     </header>
 
-    <section class="gifts-guide" aria-label="Presentes e pontuação">
+    <section class="gifts-guide" aria-label="Presentes de cada time">
       <div class="gifts-guide-head">
-        <div><span>🎁</span><h2>Envie um presente para marcar pontos</h2></div>
-        <small>Escolha seu time no comentário e depois mande o presente</small>
+        <div><span>🎁</span><h2>Presente de cada time</h2></div>
+        <small>Todos custam 1 moeda. O próprio presente escolhe e pontua o time.</small>
       </div>
       <div id="giftsGuideList" class="gifts-guide-list"></div>
     </section>
@@ -58,6 +58,7 @@
   <div id="appModal" class="modal-root" aria-hidden="true"><div class="modal-backdrop" data-close-modal></div><section class="app-modal" role="dialog" aria-modal="true"><button class="modal-close" data-close-modal aria-label="Fechar">×</button><div id="modalContent"></div></section></div>
 
   <script src="preboot.js"></script>
+  <script src="team-gifts.js"></script>
   <script src="gifts-panel.js"></script>
   <script src="app.js"></script>
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" crossorigin="anonymous"></script>
