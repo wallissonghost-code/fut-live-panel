@@ -18,13 +18,13 @@
 <body>
   <main class="app-shell">
     <section class="connection-bar glass admin-only">
-      <div><span id="connectionDot" class="connection-dot"></span><strong id="connectionText">Modo demonstração</strong><small id="connectionDetail">Backend não configurado</small></div>
+      <div><span id="connectionDot" class="connection-dot"></span><strong id="connectionText">Modo demonstração</strong><small id="connectionDetail">Pronto para conectar</small></div>
       <div class="connection-actions"><button id="connectLiveButton" type="button">Conectar LIVE</button><button id="historyButton" type="button">Histórico</button></div>
     </section>
 
     <header class="topbar glass">
       <div class="brand-wrap"><span class="live-pill"><span class="live-dot"></span> AO VIVO</span><div><p class="eyebrow">PAINEL INTERATIVO</p><h1>FUT <span>LIVE</span></h1></div></div>
-      <div class="top-stats" aria-label="Estatísticas da live"><div><span>👑</span><strong id="winsCount">182</strong></div><div><span>👥</span><strong id="viewerCount">0</strong></div><div><span>💎</span><strong id="giftCount">123</strong></div></div>
+      <div class="top-stats" aria-label="Estatísticas da live"><div><span>👑</span><strong id="winsCount">0</strong></div><div><span>👥</span><strong id="viewerCount">0</strong></div><div><span>💎</span><strong id="giftCount">0</strong></div></div>
     </header>
 
     <section class="event-banner glass"><div class="event-copy"><span class="event-icon">⚡</span><div><p>EVENTO ATIVO</p><strong id="eventName">SÁBADO PREMIADO</strong></div></div><div class="event-ball" aria-hidden="true">⚽</div><div class="event-timer"><p>TERMINA EM</p><strong id="countdown">01:23:45</strong></div></section>
@@ -33,10 +33,10 @@
       <section class="ranking-panel glass"><div class="section-title"><div><span>🏆</span><h2>Ranking de clubes</h2></div><button id="simulateGift" class="ghost-button admin-only" type="button">Simular presente</button></div><div id="rankingList" class="ranking-list" aria-live="polite"></div></section>
       <aside class="side-widgets">
         <section class="goal-card widget-card"><div><strong id="goalCount">50</strong><span>GOLS</span></div><div class="flame-ball">⚽</div><p id="goalMessage">MANDE PRESENTE E CONCORRA</p></section>
-        <section class="widget-card last-event-card"><p class="widget-label">👑 ÚLTIMO PRESENTE</p><div class="user-chip"><span class="avatar" id="lastGiftAvatar">P</span><div><strong id="lastGiftUser">gbzins_x</strong><small id="lastGiftName">Rosa · +1 ponto</small></div></div></section>
-        <section class="widget-card last-event-card"><p class="widget-label">👆 ÚLTIMO TAP TAP</p><div class="user-chip"><span class="avatar blue" id="lastLikeAvatar">K</span><div><strong id="lastLikeUser">knzinsc7</strong><small>curtiu a live</small></div></div></section>
-        <section class="widget-card likes-card"><p class="widget-label pink">❤ CURTIDAS AO VIVO</p><div class="likes-row"><div class="progress-track"><span id="likesProgress"></span></div><strong id="likesCount">5</strong></div><small><span id="peopleLiking">5</span> pessoas curtindo agora</small></section>
-        <section class="widget-card last-event-card"><p class="widget-label">➕ ÚLTIMO SEGUIDOR</p><div class="user-chip"><span class="avatar violet" id="lastFollowerAvatar">G</span><div><strong id="lastFollowerUser">guizinn870</strong><small>começou a seguir</small></div></div></section>
+        <section class="widget-card last-event-card"><p class="widget-label">👑 ÚLTIMO PRESENTE</p><div class="user-chip"><span class="avatar" id="lastGiftAvatar">–</span><div><strong id="lastGiftUser">Aguardando</strong><small id="lastGiftName">Nenhum presente ainda</small></div></div></section>
+        <section class="widget-card last-event-card"><p class="widget-label">👆 ÚLTIMO TAP TAP</p><div class="user-chip"><span class="avatar blue" id="lastLikeAvatar">–</span><div><strong id="lastLikeUser">Aguardando</strong><small>nenhuma curtida ainda</small></div></div></section>
+        <section class="widget-card likes-card"><p class="widget-label pink">❤ CURTIDAS AO VIVO</p><div class="likes-row"><div class="progress-track"><span id="likesProgress"></span></div><strong id="likesCount">0</strong></div><small><span id="peopleLiking">0</span> pessoas curtindo agora</small></section>
+        <section class="widget-card last-event-card"><p class="widget-label">➕ ÚLTIMO SEGUIDOR</p><div class="user-chip"><span class="avatar violet" id="lastFollowerAvatar">–</span><div><strong id="lastFollowerUser">Aguardando</strong><small>nenhum seguidor ainda</small></div></div></section>
       </aside>
     </section>
 
@@ -48,6 +48,7 @@
 
   <div id="appModal" class="modal-root" aria-hidden="true"><div class="modal-backdrop" data-close-modal></div><section class="app-modal" role="dialog" aria-modal="true"><button class="modal-close" data-close-modal aria-label="Fechar">×</button><div id="modalContent"></div></section></div>
 
+  <script src="preboot.js"></script>
   <script src="app.js"></script>
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" crossorigin="anonymous"></script>
   <script src="realtime.js"></script>
