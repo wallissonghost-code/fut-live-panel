@@ -14,9 +14,11 @@
   document.addEventListener('click',e=>{if(e.target.matches('[data-close-modal]'))closeModal()});
   function teamByName(name){return fallbackTeams().find(t=>normalize(t.name)===normalize(name))}
   function teamCard(name){const t=teamByName(name);if(!t)return'';return `<div class="battle-team"><span class="battle-team-badge"><img src="${esc(t.logo)}" alt="Escudo ${esc(t.name)}"><b hidden>${esc(t.short)}</b></span><strong>${esc(t.name)}</strong></div>`}
+  function sideMarkup(side,num,isLeading){return `<section class="battle-side side-${num} ${isLeading?'is-leading':''}"><div class="battle-side-head"><span class="battle-side-label">${esc(side.name)}</span><small>${side.teams.length} time${side.teams.length===1?'':'s'}</small></div><div class="battle-score-wrap"><div class="battle-score">${side.score}</div><span class="battle-score-unit">PONTOS</span><span class="battle-leader-tag" ${isLeading?'':'hidden'}>👑 NA FRENTE</span></div><div class="battle-teams">${side.teams.map(teamCard).join('')}</div><div class="battle-manual admin-only"><button data-side="${num}" data-delta="-1">−1</button><button class="plus" data-side="${num}" data-delta="1">+1</button></div></section>`}
   function render(){
     const root=document.querySelector('#battleBoard');if(!root)return;
-    root.innerHTML=`<section class="battle-side side-1"><div class="battle-side-head"><span class="battle-side-label">${esc(state.side1.name)}</span><small>${state.side1.teams.length} time${state.side1.teams.length===1?'':'s'}</small></div><div class="battle-score">${state.side1.score}</div><div class="battle-teams">${state.side1.teams.map(teamCard).join('')}</div><div class="battle-manual admin-only"><button data-side="1" data-delta="-1">−1</button><button class="plus" data-side="1" data-delta="1">+1</button></div></section><div class="battle-vs">VS</div><section class="battle-side side-2"><div class="battle-side-head"><span class="battle-side-label">${esc(state.side2.name)}</span><small>${state.side2.teams.length} time${state.side2.teams.length===1?'':'s'}</small></div><div class="battle-score">${state.side2.score}</div><div class="battle-teams">${state.side2.teams.map(teamCard).join('')}</div><div class="battle-manual admin-only"><button data-side="2" data-delta="-1">−1</button><button class="plus" data-side="2" data-delta="1">+1</button></div></section>`;
+    const s1=Number(state.side1.score)||0,s2=Number(state.side2.score)||0;
+    root.innerHTML=`${sideMarkup(state.side1,1,s1>s2)}<div class="battle-vs"><strong>VS</strong><small>BATALHA</small></div>${sideMarkup(state.side2,2,s2>s1)}`;
     root.querySelectorAll('[data-delta]').forEach(btn=>btn.addEventListener('click',()=>addPoints(Number(btn.dataset.side),Number(btn.dataset.delta),'Ajuste manual')));
     root.querySelectorAll('.battle-team-badge img').forEach(img=>img.addEventListener('error',()=>{img.hidden=true;img.nextElementSibling.hidden=false}));
     const last=document.querySelector('#battleLastEvent');if(last)last.textContent=state.lastEvent;
@@ -24,6 +26,7 @@
     const likes=document.querySelector('#likesCount');if(likes)likes.textContent=state.likes||0;
     const people=document.querySelector('#peopleLiking');if(people)people.textContent=state.likes||0;
     const prog=document.querySelector('#likesProgress');if(prog)prog.style.width=`${Math.min(100,state.likes||0)}%`;
+    const event=document.querySelector('#eventName');if(event)event.textContent=`${state.side1.name} × ${state.side2.name}`;
   }
   function addPoints(side,points,source='Presente'){
     const target=side===2?state.side2:state.side1;const delta=Number(points)||0;
