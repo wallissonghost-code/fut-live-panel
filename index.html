@@ -28,39 +28,30 @@
       <div class="top-stats" aria-label="Estatísticas da live"><div><span>⚔️</span><strong id="winsCount">1x1</strong></div><div><span>👥</span><strong id="viewerCount">0</strong></div><div><span>🎁</span><strong id="giftCount">0</strong></div></div>
     </header>
 
-    <section class="battle-config-bar admin-only">
-      <button id="battleConfigButton" type="button">⚙️ Configurar lados</button>
-      <button id="battleResetButton" type="button">♻️ Resetar placar</button>
-    </section>
-
+    <section class="battle-config-bar admin-only"><button id="battleConfigButton" type="button">⚙️ Configurar lados</button><button id="battleResetButton" type="button">♻️ Resetar placar</button></section>
     <section id="battleBoard" class="battle-board" aria-live="polite"></section>
     <p class="battle-help">Comente <strong>1</strong> para apoiar o Lado 1 ou <strong>2</strong> para apoiar o Lado 2. Depois, envie o presente.</p>
-
     <section class="battle-last-event"><strong>Última pontuação</strong><small id="battleLastEvent">Aguardando a batalha começar</small></section>
 
-    <section class="event-banner glass"><div class="event-copy"><span class="event-icon">⚡</span><div><p>BATALHA ATIVA</p><strong id="eventName">LADO 1 × LADO 2</strong></div></div><div class="event-ball" aria-hidden="true">⚽</div><div class="event-timer"><p>TERMINA EM</p><strong id="countdown">01:23:45</strong></div></section>
+    <section class="event-banner glass"><div class="event-copy"><span class="event-icon">⚡</span><div><p>BATALHA ATIVA</p><strong id="eventName">LADO 1 × LADO 2</strong></div></div><div class="event-ball" aria-hidden="true">⚽</div><div class="event-timer"><p>TERMINA EM</p><strong id="countdown">01:00:00</strong></div></section>
 
     <section class="dashboard-grid">
       <section class="ranking-panel glass"><div class="section-title"><div><span>📣</span><h2>Como participar</h2></div></div><div class="modal-list"><div class="modal-item"><strong>1. Escolha um lado</strong><small>Comente 1 ou 2 no chat da LIVE.</small></div><div class="modal-item"><strong>2. Envie um presente</strong><small>O valor recebido vira pontos para o lado escolhido.</small></div><div class="modal-item"><strong>3. Ajude seu lado a vencer</strong><small>Os times selecionados representam cada torcida.</small></div></div></section>
       <aside class="side-widgets">
         <section class="widget-card last-event-card"><p class="widget-label">👑 ÚLTIMO PRESENTE</p><div class="user-chip"><span class="avatar" id="lastGiftAvatar">–</span><div><strong id="lastGiftUser">Aguardando</strong><small id="lastGiftName">Nenhum presente ainda</small></div></div></section>
         <section class="widget-card last-event-card"><p class="widget-label">👆 ÚLTIMO TAP TAP</p><div class="user-chip"><span class="avatar blue" id="lastLikeAvatar">–</span><div><strong id="lastLikeUser">Aguardando</strong><small>nenhuma curtida ainda</small></div></div></section>
-        <section class="widget-card likes-card"><p class="widget-label pink">❤ CURTIDAS AO VIVO</p><div class="likes-row"><div class="progress-track"><span id="likesProgress"></span></div><strong id="likesCount">0</strong></div><small><span id="peopleLiking">0</span> pessoas curtindo agora</small></section>
+        <section class="widget-card likes-card"><p class="widget-label pink">❤ CURTIDAS AO VIVO</p><div class="likes-row"><div class="progress-track"><span id="likesProgress"></span></div><strong id="likesCount">0</strong></div><small><span id="peopleLiking">0</span> curtidas registradas</small></section>
         <section class="widget-card last-event-card"><p class="widget-label">➕ ÚLTIMO SEGUIDOR</p><div class="user-chip"><span class="avatar violet" id="lastFollowerAvatar">–</span><div><strong id="lastFollowerUser">Aguardando</strong><small>nenhum seguidor ainda</small></div></div></section>
       </aside>
     </section>
 
-    <nav class="bottom-nav glass admin-only" aria-label="Navegação principal"><button id="chatButton" type="button"><span>💬</span><small>Chat</small></button><button id="rankingButton" type="button"><span>⚔️</span><small>Batalha</small></button><button type="button" class="tap-main" id="tapButton"><span>⚽</span><small>Tap Tap</small></button><button id="prizesButton" type="button"><span>🎁</span><small>Presentes</small></button><button id="settingsButton" type="button"><span>⚙️</span><small>Ajustes</small></button></nav>
-    <button id="exitBroadcast" class="exit-broadcast" type="button">Sair da transmissão</button>
-    <div id="eventEffect" class="event-effect" aria-live="polite"></div>
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="eventEffect" class="event-effect" aria-live="polite"></div><div id="toast" class="toast" role="status" aria-live="polite"></div>
   </main>
 
   <div id="appModal" class="modal-root" aria-hidden="true"><div class="modal-backdrop" data-close-modal></div><section class="app-modal" role="dialog" aria-modal="true"><button class="modal-close" data-close-modal aria-label="Fechar">×</button><div id="modalContent"></div></section></div>
 
   <script src="preboot.js"></script>
   <script src="team-gifts.js"></script>
-  <script src="app.js"></script>
   <script src="battle.js"></script>
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" crossorigin="anonymous"></script>
   <script src="realtime.js"></script>
