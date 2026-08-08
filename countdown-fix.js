@@ -10,12 +10,14 @@
   document.addEventListener('DOMContentLoaded',()=>{
     const el=document.querySelector('#countdown');
     if(!el)return;
-    setInterval(()=>{
+    let last='';
+    const tick=()=>{
       const state=window.FutLiveBattle?.getState?.();
       if(!state)return;
-      if(state.round?.finished){el.textContent='ENCERRADA';return;}
-      const endAt=Number(state.round?.endAt)||Date.now();
-      el.textContent=formatSeconds((endAt-Date.now())/1000);
-    },250);
+      const next=state.round?.finished?'ENCERRADA':formatSeconds(((Number(state.round?.endAt)||Date.now())-Date.now())/1000);
+      if(next!==last){el.textContent=next;last=next;}
+    };
+    tick();
+    setInterval(tick,1000);
   });
 })();
