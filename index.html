@@ -42,16 +42,20 @@
     <section class="battle-stage">
       <section id="battleBoard" class="battle-board" aria-live="polite"></section>
       <div class="battle-stage-footer">
-        <p class="battle-help">Comente <strong>1</strong> ou <strong>2</strong> para escolher um lado e depois envie um presente.</p>
         <section class="battle-last-event"><strong>Última pontuação</strong><small id="battleLastEvent">Aguardando a batalha começar</small></section>
       </div>
+    </section>
+
+    <section class="battle-tutorial" aria-label="Como participar da batalha">
+      <article class="tutorial-step"><span>1</span><div><strong>Comente 1 ou 2</strong><small>Escolha o lado que você quer apoiar.</small></div></article>
+      <article class="tutorial-step"><span>2</span><div><strong>Envie um presente</strong><small>O valor recebido vira pontos.</small></div></article>
+      <article class="tutorial-step"><span>3</span><div><strong>Ajude seu lado</strong><small>Quem terminar com mais pontos vence.</small></div></article>
     </section>
 
     <section class="live-strip" aria-label="Atividade da live">
       <article class="live-strip-card"><span class="avatar" id="lastGiftAvatar">–</span><div><small>👑 ÚLTIMO PRESENTE</small><strong id="lastGiftUser">Aguardando</strong><em id="lastGiftName">Nenhum presente ainda</em></div></article>
       <article class="live-strip-card"><span class="avatar blue" id="lastLikeAvatar">–</span><div><small>👆 ÚLTIMO TAP TAP</small><strong id="lastLikeUser">Aguardando</strong><em><span id="likesCount">0</span> curtidas</em><span id="peopleLiking" hidden>0</span><span class="progress-track" aria-hidden="true"><span id="likesProgress"></span></span></div></article>
       <article class="live-strip-card"><span class="avatar violet" id="lastFollowerAvatar">–</span><div><small>➕ ÚLTIMO SEGUIDOR</small><strong id="lastFollowerUser">Aguardando</strong><em>nenhum seguidor ainda</em></div></article>
-      <article class="live-strip-card participation-card"><div><small>📣 COMO PARTICIPAR</small><strong>Comente 1 ou 2 → envie presente → some pontos</strong></div></article>
     </section>
 
     <div id="eventEffect" class="event-effect" aria-live="polite"></div><div id="toast" class="toast" role="status" aria-live="polite"></div>
