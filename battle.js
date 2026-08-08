@@ -1,26 +1,39 @@
 (() => {
   'use strict';
-  const KEY='futLiveBattleV1';
-  const normalize=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const fallbackTeams=()=>window.FutLiveTeamGifts?.teams||[];
-  function defaults(){const t=fallbackTeams();return {side1:{name:'LADO 1',score:0,teams:t.slice(0,2).map(x=>x.name)},side2:{name:'LADO 2',score:0,teams:t.slice(2,4).map(x=>x.name)},lastEvent:'Aguardando a batalha começar',giftCount:0,likes:0}}
-  function load(){try{return {...defaults(),...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch{return defaults()}}
+  const KEY='futLiveBattleV2';
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+  const placeholder='data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#141a16"/><stop offset="1" stop-color="#080b09"/></linearGradient></defs><rect width="600" height="600" rx="80" fill="url(#g)"/><circle cx="300" cy="230" r="82" fill="#1d2620"/><path d="M130 500c24-106 94-166 170-166s146 60 170 166" fill="#1d2620"/><circle cx="300" cy="300" r="220" fill="none" stroke="#8dff00" stroke-opacity=".28" stroke-width="8" stroke-dasharray="18 18"/><text x="300" y="558" fill="#8dff00" opacity=".8" font-family="Arial" font-size="32" font-weight="700" text-anchor="middle">ESCOLHA UMA IMAGEM</text></svg>`);
+
+  function defaults(){return {side1:{name:'LADO 1',score:0,image:''},side2:{name:'LADO 2',score:0,image:''},lastEvent:'Aguardando a batalha começar',giftCount:0,likes:0}}
+  function load(){
+    const base=defaults();
+    try{
+      const old=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem('futLiveBattleV1')||'{}');
+      return {...base,...old,side1:{...base.side1,...old.side1},side2:{...base.side2,...old.side2}};
+    }catch{return base}
+  }
   let state=load();
-  function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch{alert('A imagem é grande demais. Tente uma imagem menor.') }}
   function openModal(html){const root=document.querySelector('#appModal');const content=document.querySelector('#modalContent');if(!root||!content)return;content.innerHTML=html;root.classList.add('open');root.setAttribute('aria-hidden','false')}
   function closeModal(){const root=document.querySelector('#appModal');if(!root)return;root.classList.remove('open');root.setAttribute('aria-hidden','true')}
   window.openModal=openModal;window.closeModal=closeModal;
   document.addEventListener('click',e=>{if(e.target.matches('[data-close-modal]'))closeModal()});
-  function teamByName(name){return fallbackTeams().find(t=>normalize(t.name)===normalize(name))}
-  function teamCard(name){const t=teamByName(name);if(!t)return'';return `<div class="battle-team"><span class="battle-team-badge"><img src="${esc(t.logo)}" alt="Escudo ${esc(t.name)}"><b hidden>${esc(t.short)}</b></span><strong>${esc(t.name)}</strong></div>`}
-  function sideMarkup(side,num,isLeading){return `<section class="battle-side side-${num} ${isLeading?'is-leading':''}"><div class="battle-side-head"><span class="battle-side-label">${esc(side.name)}</span><small>${side.teams.length} time${side.teams.length===1?'':'s'}</small></div><div class="battle-score-wrap"><div class="battle-score">${side.score}</div><span class="battle-score-unit">PONTOS</span><span class="battle-leader-tag" ${isLeading?'':'hidden'}>👑 NA FRENTE</span></div><div class="battle-teams">${side.teams.map(teamCard).join('')}</div><div class="battle-manual admin-only"><button data-side="${num}" data-delta="-1">−1</button><button class="plus" data-side="${num}" data-delta="1">+1</button></div></section>`}
+
+  function sideMarkup(side,num,isLeading){
+    const img=side.image||placeholder;
+    return `<section class="battle-side side-${num} ${isLeading?'is-leading':''}">
+      <div class="battle-side-head"><span class="battle-side-label">${esc(side.name)}</span><span class="battle-side-number">LADO ${num}</span></div>
+      <div class="battle-image-wrap"><img class="battle-main-image" src="${esc(img)}" alt="Imagem do ${esc(side.name)}"></div>
+      <div class="battle-score-wrap"><div class="battle-score">${Number(side.score)||0}</div><span class="battle-score-unit">PONTOS</span>${isLeading?'<span class="battle-leader-tag">👑 NA FRENTE</span>':''}</div>
+      <div class="battle-manual admin-only"><button data-side="${num}" data-delta="-1">−1</button><button class="plus" data-side="${num}" data-delta="1">+1</button></div>
+    </section>`
+  }
+
   function render(){
     const root=document.querySelector('#battleBoard');if(!root)return;
     const s1=Number(state.side1.score)||0,s2=Number(state.side2.score)||0;
-    root.innerHTML=`${sideMarkup(state.side1,1,s1>s2)}<div class="battle-vs"><strong>VS</strong><small>BATALHA</small></div>${sideMarkup(state.side2,2,s2>s1)}`;
+    root.innerHTML=`${sideMarkup(state.side1,1,s1>s2)}<div class="battle-vs"><strong>VS</strong></div>${sideMarkup(state.side2,2,s2>s1)}`;
     root.querySelectorAll('[data-delta]').forEach(btn=>btn.addEventListener('click',()=>addPoints(Number(btn.dataset.side),Number(btn.dataset.delta),'Ajuste manual')));
-    root.querySelectorAll('.battle-team-badge img').forEach(img=>img.addEventListener('error',()=>{img.hidden=true;img.nextElementSibling.hidden=false}));
     const last=document.querySelector('#battleLastEvent');if(last)last.textContent=state.lastEvent;
     const gifts=document.querySelector('#giftCount');if(gifts)gifts.textContent=state.giftCount||0;
     const likes=document.querySelector('#likesCount');if(likes)likes.textContent=state.likes||0;
@@ -28,6 +41,7 @@
     const prog=document.querySelector('#likesProgress');if(prog)prog.style.width=`${Math.min(100,state.likes||0)}%`;
     const event=document.querySelector('#eventName');if(event)event.textContent=`${state.side1.name} × ${state.side2.name}`;
   }
+
   function addPoints(side,points,source='Presente'){
     const target=side===2?state.side2:state.side1;const delta=Number(points)||0;
     target.score=Math.max(0,Number(target.score||0)+delta);
@@ -36,16 +50,43 @@
     save();render();
   }
   function reset(){state.side1.score=0;state.side2.score=0;state.giftCount=0;state.lastEvent='Batalha resetada';save();render()}
-  function selectOptions(selected,used){return fallbackTeams().map(t=>`<option value="${esc(t.name)}" ${selected===t.name?'selected':''} ${used.includes(t.name)&&selected!==t.name?'disabled':''}>${esc(t.name)}</option>`).join('')}
-  function editorSide(sideNum){const side=sideNum===2?state.side2:state.side1;return `<section class="battle-editor-section"><h4>${sideNum===1?'Lado 1':'Lado 2'}</h4><label>Nome<input class="modal-input" id="battleName${sideNum}" value="${esc(side.name)}"></label><label>Quantidade de times<select class="battle-count" id="battleCount${sideNum}">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<option value="${n}" ${side.teams.length===n?'selected':''}>${n}</option>`).join('')}</select></label><div class="battle-team-selects" id="battleSelects${sideNum}"></div></section>`}
-  function rebuildSelects(sideNum){const count=Number(document.querySelector(`#battleCount${sideNum}`).value)||1;const side=sideNum===2?state.side2:state.side1;const other=sideNum===2?state.side1.teams:state.side2.teams;const box=document.querySelector(`#battleSelects${sideNum}`);if(!box)return;box.innerHTML=Array.from({length:count},(_,i)=>`<label>Time ${i+1}<select class="battle-count" data-battle-team="${sideNum}">${selectOptions(side.teams[i]||fallbackTeams().find(t=>!other.includes(t.name))?.name||fallbackTeams()[0]?.name||'',other)}</select></label>`).join('')}
+
+  function editorSide(num){const side=num===2?state.side2:state.side1;return `<section class="battle-editor-section">
+    <h4>Lado ${num}</h4>
+    <label>Nome<input class="modal-input" id="battleName${num}" value="${esc(side.name)}" placeholder="Ex.: Cruzeiro"></label>
+    <div class="image-preview-box"><img id="battlePreview${num}" src="${esc(side.image||placeholder)}" alt="Prévia do lado ${num}"></div>
+    <label>Escolher imagem<input class="battle-file-input" id="battleFile${num}" type="file" accept="image/*"></label>
+    <label>Ou colar URL da imagem<input class="modal-input" id="battleUrl${num}" type="url" value="${side.image&&/^https?:/i.test(side.image)?esc(side.image):''}" placeholder="https://..."></label>
+    <button type="button" class="battle-clear-image" id="battleClear${num}">Remover imagem</button>
+  </section>`}
+
+  function fileToDataUrl(file,preview){
+    if(!file)return;
+    if(file.size>3*1024*1024)return alert('Use uma imagem de até 3 MB.');
+    const reader=new FileReader();reader.onload=()=>{preview.src=reader.result;preview.dataset.pending=reader.result};reader.readAsDataURL(file);
+  }
+
   function openConfig(){
-    openModal(`<h3>Configurar batalha</h3><div class="battle-editor">${editorSide(1)}${editorSide(2)}</div><div class="battle-actions"><button id="saveBattle" class="modal-action">Salvar batalha</button><button id="resetBattleModal" class="modal-danger">Resetar placar</button></div><p class="helper-text">Na LIVE, a pessoa comenta <b>1</b> ou <b>2</b> para escolher o lado. O próximo presente soma o valor recebido ao lado escolhido.</p>`);
-    rebuildSelects(1);rebuildSelects(2);
-    document.querySelector('#battleCount1')?.addEventListener('change',()=>rebuildSelects(1));document.querySelector('#battleCount2')?.addEventListener('change',()=>rebuildSelects(2));
-    document.querySelector('#saveBattle')?.addEventListener('click',()=>{const side1Teams=[...document.querySelectorAll('[data-battle-team="1"]')].map(x=>x.value);const side2Teams=[...document.querySelectorAll('[data-battle-team="2"]')].map(x=>x.value);if(new Set([...side1Teams,...side2Teams]).size!==side1Teams.length+side2Teams.length)return alert('Não repita o mesmo time nos dois lados.');state.side1.name=document.querySelector('#battleName1').value.trim()||'LADO 1';state.side2.name=document.querySelector('#battleName2').value.trim()||'LADO 2';state.side1.teams=side1Teams;state.side2.teams=side2Teams;save();render();closeModal()});
+    openModal(`<h3>Configurar batalha</h3><div class="battle-editor">${editorSide(1)}${editorSide(2)}</div><div class="battle-actions"><button id="saveBattle" class="modal-action">Salvar batalha</button><button id="resetBattleModal" class="modal-danger">Resetar placar</button></div><p class="helper-text">Você pode escolher uma imagem do celular/computador ou colar uma URL. Na LIVE, o público comenta <b>1</b> ou <b>2</b> e o próximo presente pontua aquele lado.</p>`);
+    [1,2].forEach(num=>{
+      const file=document.querySelector(`#battleFile${num}`),preview=document.querySelector(`#battlePreview${num}`),url=document.querySelector(`#battleUrl${num}`),clear=document.querySelector(`#battleClear${num}`);
+      file?.addEventListener('change',()=>fileToDataUrl(file.files?.[0],preview));
+      url?.addEventListener('input',()=>{if(/^https?:\/\//i.test(url.value.trim())){preview.src=url.value.trim();preview.dataset.pending=url.value.trim()}});
+      clear?.addEventListener('click',()=>{preview.src=placeholder;preview.dataset.pending='';if(url)url.value='';if(file)file.value=''})
+    });
+    document.querySelector('#saveBattle')?.addEventListener('click',()=>{
+      [1,2].forEach(num=>{
+        const side=num===2?state.side2:state.side1;
+        side.name=document.querySelector(`#battleName${num}`).value.trim()||`LADO ${num}`;
+        const preview=document.querySelector(`#battlePreview${num}`),url=document.querySelector(`#battleUrl${num}`).value.trim();
+        if(preview?.dataset.pending!==undefined)side.image=preview.dataset.pending;
+        else if(url)side.image=url;
+      });
+      save();render();closeModal();
+    });
     document.querySelector('#resetBattleModal')?.addEventListener('click',()=>{if(confirm('Zerar o placar dos dois lados?')){reset();closeModal()}})
   }
+
   function receiveGift({side,points=1,username='usuário',giftName='Presente'}){const s=Number(side)===2?2:1;addPoints(s,Math.max(1,Number(points)||1),`${username} · ${giftName}`);const u=document.querySelector('#lastGiftUser');if(u)u.textContent=username;const n=document.querySelector('#lastGiftName');if(n)n.textContent=`${giftName} · +${Math.max(1,Number(points)||1)}`;const a=document.querySelector('#lastGiftAvatar');if(a)a.textContent=String(username||'?')[0].toUpperCase()}
   function receiveLike(username,count=1){state.likes=(Number(state.likes)||0)+Math.max(1,Number(count)||1);save();render();const u=document.querySelector('#lastLikeUser');if(u)u.textContent=username;const a=document.querySelector('#lastLikeAvatar');if(a)a.textContent=String(username||'?')[0].toUpperCase()}
   function receiveFollow(username){const u=document.querySelector('#lastFollowerUser');if(u)u.textContent=username;const a=document.querySelector('#lastFollowerAvatar');if(a)a.textContent=String(username||'?')[0].toUpperCase()}
