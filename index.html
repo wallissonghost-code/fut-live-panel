@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="admin.css" />
   <link rel="stylesheet" href="battle.css" />
   <link rel="stylesheet" href="battle-tutorial.css" />
+  <link rel="stylesheet" href="battle-victory.css" />
 </head>
 <body class="single-screen-battle">
   <main class="app-shell battle-page">
@@ -36,8 +37,8 @@
     </header>
 
     <section class="battle-toolbar admin-only">
-      <button id="battleConfigButton" type="button">🖼️ Escolher imagens</button>
-      <button id="battleResetButton" type="button">♻️ Resetar placar</button>
+      <button id="battleConfigButton" type="button">⚙️ Configurar batalha</button>
+      <button id="battleResetButton" type="button">♻️ Nova batalha</button>
     </section>
 
     <section class="battle-stage">
@@ -50,7 +51,7 @@
     <section class="battle-tutorial" aria-label="Como participar da batalha">
       <article class="tutorial-step"><span>1</span><div><strong>Comente 1 ou 2</strong><small>Escolha o lado que você quer apoiar.</small></div></article>
       <article class="tutorial-step"><span>2</span><div><strong>Interaja na LIVE</strong><small>🎁 Presente pontua · ❤️ <b data-like-rule>10</b> curtidas = 1 ponto.</small></div></article>
-      <article class="tutorial-step"><span>3</span><div><strong>Siga e ajude seu lado</strong><small>➕ Novo follow = +<b data-follow-rule>5</b> pontos.</small></div></article>
+      <article class="tutorial-step"><span>3</span><div><strong>Siga e ajude seu lado</strong><small>➕ Novo follow = +<b data-follow-rule>5</b> pontos · meta <b data-goal-rule>500</b>.</small></div></article>
     </section>
 
     <section class="live-strip" aria-label="Atividade da live">
@@ -61,6 +62,20 @@
 
     <div id="eventEffect" class="event-effect" aria-live="polite"></div><div id="toast" class="toast" role="status" aria-live="polite"></div>
   </main>
+
+  <div id="victoryOverlay" class="victory-overlay" aria-hidden="true">
+    <section id="victoryCard" class="victory-card">
+      <div class="victory-crown">🏆</div>
+      <span class="victory-kicker">VENCEDOR DA BATALHA</span>
+      <h2 id="victoryName" class="victory-name">LADO 1</h2>
+      <div id="victoryScore" class="victory-score">0 × 0</div>
+      <p id="victoryReason" class="victory-reason">Meta alcançada</p>
+      <div class="victory-actions admin-only">
+        <button id="newRoundButton" class="new-round" type="button">Nova batalha</button>
+        <button id="closeVictoryButton" class="close-win" type="button">Fechar</button>
+      </div>
+    </section>
+  </div>
 
   <div id="appModal" class="modal-root" aria-hidden="true"><div class="modal-backdrop" data-close-modal></div><section class="app-modal" role="dialog" aria-modal="true"><button class="modal-close" data-close-modal aria-label="Fechar">×</button><div id="modalContent"></div></section></div>
 
