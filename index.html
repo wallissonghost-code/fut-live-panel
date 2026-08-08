@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#050706" />
-  <meta name="description" content="Batalha de times para TikTok LIVE: Lado 1 x Lado 2." />
+  <meta name="description" content="Batalha interativa Lado 1 x Lado 2 para TikTok LIVE." />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>FUT Live Battle</title>
   <link rel="manifest" href="manifest.webmanifest" />
@@ -24,8 +24,8 @@
     </section>
 
     <header class="battle-topbar glass">
-      <div class="battle-brand"><span class="live-pill"><span class="live-dot"></span> AO VIVO</span><div><small>BATALHA DE TIMES</small><strong>FUT <span>LIVE</span></strong></div></div>
-      <div class="battle-event-title"><small>BATALHA ATIVA</small><strong id="eventName">LADO 1 × LADO 2</strong></div>
+      <div class="battle-brand"><span class="live-pill"><span class="live-dot"></span> AO VIVO</span><div><small>BATALHA</small><strong>FUT <span>LIVE</span></strong></div></div>
+      <div class="battle-event-title"><small>CONFRONTO ATIVO</small><strong id="eventName">LADO 1 × LADO 2</strong></div>
       <div class="battle-header-stats">
         <div><small>👥 PÚBLICO</small><strong id="viewerCount">0</strong></div>
         <div><small>🎁 PRESENTES</small><strong id="giftCount">0</strong></div>
@@ -35,14 +35,14 @@
     </header>
 
     <section class="battle-toolbar admin-only">
-      <button id="battleConfigButton" type="button">⚙️ Configurar lados</button>
+      <button id="battleConfigButton" type="button">🖼️ Escolher imagens</button>
       <button id="battleResetButton" type="button">♻️ Resetar placar</button>
     </section>
 
     <section class="battle-stage">
       <section id="battleBoard" class="battle-board" aria-live="polite"></section>
       <div class="battle-stage-footer">
-        <p class="battle-help">Comente <strong>1</strong> ou <strong>2</strong> para escolher o lado e depois envie o presente.</p>
+        <p class="battle-help">Comente <strong>1</strong> ou <strong>2</strong> para escolher um lado e depois envie um presente.</p>
         <section class="battle-last-event"><strong>Última pontuação</strong><small id="battleLastEvent">Aguardando a batalha começar</small></section>
       </div>
     </section>
@@ -51,7 +51,7 @@
       <article class="live-strip-card"><span class="avatar" id="lastGiftAvatar">–</span><div><small>👑 ÚLTIMO PRESENTE</small><strong id="lastGiftUser">Aguardando</strong><em id="lastGiftName">Nenhum presente ainda</em></div></article>
       <article class="live-strip-card"><span class="avatar blue" id="lastLikeAvatar">–</span><div><small>👆 ÚLTIMO TAP TAP</small><strong id="lastLikeUser">Aguardando</strong><em><span id="likesCount">0</span> curtidas</em><span id="peopleLiking" hidden>0</span><span class="progress-track" aria-hidden="true"><span id="likesProgress"></span></span></div></article>
       <article class="live-strip-card"><span class="avatar violet" id="lastFollowerAvatar">–</span><div><small>➕ ÚLTIMO SEGUIDOR</small><strong id="lastFollowerUser">Aguardando</strong><em>nenhum seguidor ainda</em></div></article>
-      <article class="live-strip-card participation-card"><div><small>📣 COMO PARTICIPAR</small><strong>1 ou 2 no chat → envie presente → some pontos</strong></div></article>
+      <article class="live-strip-card participation-card"><div><small>📣 COMO PARTICIPAR</small><strong>Comente 1 ou 2 → envie presente → some pontos</strong></div></article>
     </section>
 
     <div id="eventEffect" class="event-effect" aria-live="polite"></div><div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -60,7 +60,6 @@
   <div id="appModal" class="modal-root" aria-hidden="true"><div class="modal-backdrop" data-close-modal></div><section class="app-modal" role="dialog" aria-modal="true"><button class="modal-close" data-close-modal aria-label="Fechar">×</button><div id="modalContent"></div></section></div>
 
   <script src="preboot.js"></script>
-  <script src="team-gifts.js"></script>
   <script src="battle.js"></script>
   <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" crossorigin="anonymous"></script>
   <script src="realtime.js"></script>
