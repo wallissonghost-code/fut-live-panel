@@ -1,4 +1,4 @@
-const CACHE='fut-live-v20';
+const CACHE='fut-live-v21';
 const ASSETS=['/','/index.html','/styles.css','/admin.css','/battle.css','/battle-tutorial.css','/battle-victory.css','/crop-editor.css','/stability.css','/live-mode.css','/preboot.js','/battle.js','/crop-editor.js','/countdown-fix.js','/countdown-stable.js','/live-mode.js','/realtime.js','/manifest.webmanifest','/icon.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
