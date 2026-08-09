@@ -8,6 +8,7 @@
   let history=loadHistory();
   let pendingTikTokUser='';
   let liveConnected=false;
+  let lastLiveError='';
   const userSide=new Map();
 
   function defaults(){return {backendUrl:'',adminPin:'',autoConnect:false,tiktokUsername:''}}
@@ -17,10 +18,21 @@
   function saveHistory(){history=history.slice(0,500);localStorage.setItem(HISTORY_KEY,JSON.stringify(history))}
   function addHistory(type,data){history.unshift({time:new Date().toISOString(),type,...data});saveHistory()}
   function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-  function setStatus(kind,text,detail=''){const dot=$('#connectionDot'),label=$('#connectionText'),sub=$('#connectionDetail');if(dot)dot.className=`connection-dot ${kind}`;if(label)label.textContent=text;if(sub)sub.textContent=detail}
+  function setStatus(kind,text,detail=''){const dot=$('#connectionDot'),label=$('#connectionText'),sub=$('#connectionDetail');if(dot)dot.className=`connection-dot ${kind}`;if(label)label.textContent=text;if(sub){sub.textContent=detail;sub.hidden=false}}
   function effect(icon,title,subtitle=''){const el=$('#eventEffect');if(!el)return;el.innerHTML=`<div><b>${icon}</b><strong>${esc(title)}</strong><small>${esc(subtitle)}</small></div>`;el.classList.remove('show');void el.offsetWidth;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)}
   function cleanUser(username=''){return String(username||'').replace(/^@/,'').trim()}
   function parseSide(comment=''){const n=String(comment).trim().toLowerCase().replace(/\s+/g,'');if(['1','lado1','time1','equipe1'].includes(n))return 1;if(['2','lado2','time2','equipe2'].includes(n))return 2;return 0}
+
+  function showLiveError(message){
+    lastLiveError=String(message||'Falha desconhecida');
+    setStatus('error','Erro na LIVE',lastLiveError);
+    effect('⚠️','ERRO NA CONEXÃO',lastLiveError);
+    if(window.openModal){
+      window.openModal(`<h3>Não consegui entrar na LIVE</h3><div class="modal-list"><div class="modal-item"><strong>Diagnóstico</strong><small style="white-space:normal;line-height:1.45">${esc(lastLiveError)}</small></div><div class="modal-item"><strong>Conta usada</strong><small>@${esc(cfg.tiktokUsername||'não informada')}</small></div></div><div class="battle-actions"><button id="retryTikTokLive" class="modal-action" type="button">Tentar novamente</button><button id="editTikTokConnection" type="button">Editar conexão</button></div><p class="helper-text">Sua LIVE pode estar aberta normalmente e, mesmo assim, o TikTok bloquear temporariamente o conector externo. O texto acima mostra em qual etapa ocorreu a falha.</p>`);
+      $('#retryTikTokLive')?.addEventListener('click',()=>{window.closeModal?.();connectTikTok(cfg.tiktokUsername)});
+      $('#editTikTokConnection')?.addEventListener('click',()=>{window.closeModal?.();setTimeout(openConnection,50)});
+    }
+  }
 
   function receiveComment(data){const username=data.username||data.uniqueId||'usuário';const comment=data.comment||'';const side=parseSide(comment);if(side){userSide.set(username,side);effect('⚔️',`${username} escolheu`,`Lado ${side}`)}addHistory('comment',{username,comment,side})}
   function receiveGift(data){const username=data.username||data.uniqueId||'usuário';const giftName=data.giftName||data.name||'Presente';const side=userSide.get(username);const points=Math.max(1,Number(data.diamondCount||1))*Math.max(1,Number(data.repeatCount||1));if(!side){effect('⚠️',`${username} enviou presente`,'Comente 1 ou 2 antes para escolher um lado');addHistory('gift',{username,giftName,points,side:0});return}window.FutLiveBattle?.receiveGift({side,points,username,giftName});addHistory('gift',{username,giftName,points,side});effect('🎁',`${username} pontuou`,`Lado ${side} · +${points}`)}
@@ -32,10 +44,10 @@
     if(!clean)return setStatus('online','Backend conectado','Informe o @ da LIVE');
     cfg.tiktokUsername=clean;saveCfg();
     if(!socket?.connected){pendingTikTokUser=clean;setStatus('loading','Aguardando backend',`Depois vou conectar @${clean}`);return}
-    pendingTikTokUser='';
+    pendingTikTokUser='';lastLiveError='';
     setStatus('loading','Conectando à LIVE',`@${clean}`);
     socket.emit('tiktok:connect',{username:clean,pin:cfg.adminPin},reply=>{
-      if(!reply?.ok){liveConnected=false;setStatus('error','Falha ao conectar LIVE',reply?.error||`@${clean}`);effect('⚠️','LIVE NÃO CONECTOU',reply?.error||'Confira o @ e se a LIVE está aberta');return}
+      if(!reply?.ok){liveConnected=false;showLiveError(reply?.error||`Não foi possível conectar @${clean}`);return}
       setStatus('loading','Entrando na LIVE',`@${clean}`);
     });
   }
@@ -51,16 +63,17 @@
     s.on('tiktok:status',d=>{
       liveConnected=!!d.connected;
       if(d.connected){
+        lastLiveError='';
         const user=cleanUser(d.username||cfg.tiktokUsername);
         setStatus('live','LIVE CONECTADA',user?`@${user} · interações ativas`:'Interações ativas');
         effect('✅','LIVE CONECTADA',user?`@${user}`:'Interações liberadas');
-      }else{
+      }else if(!lastLiveError){
         setStatus('online','Backend conectado',d.message||'Nenhuma LIVE conectada');
       }
     });
     s.on('tiktok:comment',receiveComment);s.on('tiktok:gift',receiveGift);s.on('tiktok:like',receiveLike);s.on('tiktok:follow',receiveFollow);
     s.on('tiktok:roomUser',d=>{const el=$('#viewerCount');if(el)el.textContent=new Intl.NumberFormat('pt-BR',{notation:'compact'}).format(d.viewerCount||0)});
-    s.on('tiktok:error',d=>{liveConnected=false;setStatus('error','Erro na LIVE',d.message||'Falha desconhecida');effect('⚠️','ERRO NA CONEXÃO',d.message||'')});
+    s.on('tiktok:error',d=>{liveConnected=false;showLiveError(d.message||'Falha desconhecida')});
   }
 
   function connectBackend(){
@@ -77,7 +90,7 @@
     $('#rtSave').onclick=()=>{
       cfg.backendUrl=$('#rtBackend').value.trim();cfg.adminPin=$('#rtPin').value.trim();cfg.autoConnect=$('#rtAuto').checked;cfg.tiktokUsername=cleanUser($('#rtUser').value);saveCfg();
       if(!cfg.tiktokUsername)return alert('Digite o @ da conta que está fazendo a LIVE.');
-      pendingTikTokUser=cfg.tiktokUsername;window.closeModal?.();
+      pendingTikTokUser=cfg.tiktokUsername;lastLiveError='';window.closeModal?.();
       if(socket?.connected)connectTikTok(cfg.tiktokUsername);else connectBackend();
     };
   }
@@ -88,5 +101,5 @@
   if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
   if(cfg.autoConnect&&cfg.backendUrl&&cfg.tiktokUsername){pendingTikTokUser=cfg.tiktokUsername;connectBackend()}
   else if(cfg.autoConnect&&cfg.backendUrl)connectBackend();
-  window.FutLiveRealtime={connectBackend,connectTikTok,openConnection,openHistory,isLiveConnected:()=>liveConnected};
+  window.FutLiveRealtime={connectBackend,connectTikTok,openConnection,openHistory,isLiveConnected:()=>liveConnected,getLastError:()=>lastLiveError};
 })();
